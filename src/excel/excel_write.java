@@ -2,116 +2,92 @@ package excel;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.ss.util.RegionUtil;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class excel_write {
 	File excel_file;
 	FileInputStream fs;
 	Workbook wb;
-
+	Sheet sheet;
+	
 	String excel_data[][];
+
 	// 构造函数
-	public excel_write(String data[][], String file_name) {
+	public excel_write(String file_name) {
 		// 初始化数据
 		excel_file = null;
 		fs = null;
 		wb = null;
-		excel_data = data;
+		excel_init(file_name);
 	}
 
-	public void write_data() {
-		
-		// 第一步，创建一个webbook，对应一个Excel文件
-		HSSFWorkbook wb = new HSSFWorkbook();
-		// 第二步，在webbook中添加一个sheet,对应Excel文件中的sheet
-		HSSFSheet sheet = wb.createSheet("Sheet1");
-		// 第三步，在sheet中添加表头第0行,注意老版本poi对Excel的行数列数有限制short
-		HSSFRow row = sheet.createRow(0);
-		HSSFCell cell = row.createCell(1);
-		// 第四步，创建单元格，并设置值表头 设置表头居中
-		HSSFCellStyle style = wb.createCellStyle();
-		style.setAlignment(HSSFCellStyle.ALIGN_CENTER); // 创建一个居中格式
-		style.setBorderBottom(HSSFCellStyle.BORDER_THIN); // 下边框
-		style.setBorderLeft(HSSFCellStyle.BORDER_THIN);// 左边框
-		style.setBorderTop(HSSFCellStyle.BORDER_THIN);// 上边框
-		style.setBorderRight(HSSFCellStyle.BORDER_THIN);// 右边框
-		// 设置表头
-		cell.setCellValue("");
-		cell.setCellStyle(style);
-		// 合并第一二个单元格
-		CellRangeAddress region = new CellRangeAddress(0, 0, 0, 1);
-		sheet.addMergedRegion(region);
-		RegionUtil.setBorderBottom(1, region, sheet, wb);
-		RegionUtil.setBorderLeft(1, region, sheet, wb);
-		RegionUtil.setBorderRight(1, region, sheet, wb);
-		RegionUtil.setBorderTop(1, region, sheet, wb);
-		// 表头
-		for (int i = 0; i < 2; i++) {
-			cell = row.createCell((short) (4 * i + 2));
-			cell.setCellValue("");
-			cell.setCellStyle(style);
-			region = new CellRangeAddress(0, 0, 4 * i + 2, 4 * i + 5);
-			sheet.addMergedRegion(region);
-			RegionUtil.setBorderBottom(1, region, sheet, wb);
-			RegionUtil.setBorderLeft(1, region, sheet, wb);
-			RegionUtil.setBorderRight(1, region, sheet, wb);
-			RegionUtil.setBorderTop(1, region, sheet, wb);
+	private void excel_init(String file_name) {
+		// 检查文件类型
+		int iIndex = file_name.lastIndexOf(".");
+		String ext = (iIndex < 0) ? "" : file_name.substring(iIndex + 1).toLowerCase();
+		if (!"xls,xlsx".contains(ext) || "".contains(ext)) {
+			System.out.println("文件类型不是EXCEL！");
+			return;
 		}
-		// 写入数据
-		HSSFCellStyle Astyle = wb.createCellStyle();
-		Astyle.setAlignment(HSSFCellStyle.ALIGN_CENTER); // 创建一个居中格式
-		Astyle.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER); // 创建一个居中格式
-		for (int i = 0; i < excel_data.length; i++) {
-			// 进度更新
-			row = sheet.createRow(i + 2);
-			cell = row.createCell(0);
-			for (int j = 0; j < excel_data[i].length; j++) {
-				cell.setCellValue(excel_data[i][j]);
-				cell.setCellStyle(Astyle);
-				cell = row.createCell(j + 1);
-				sheet.autoSizeColumn(j); // 自动调整列宽
-			}
-		}
-		
+		// 打开文件
 		try {
-			FileOutputStream fout = new FileOutputStream(excel_file);
-			wb.write(fout);
-			fout.close();
-			
-		} catch (Exception e) {
-			// 进度更新
-
-
+			excel_file = new File(file_name);
+			if (!excel_file.exists())
+				return;
+			// 获取表格数据输入流
+			fs = new FileInputStream(excel_file);
+			// 获取EXCEL表
+			if (ext.equals("xls"))
+				wb = new HSSFWorkbook(fs);
+			else
+				wb = new XSSFWorkbook(fs);
+			// 关闭流
+			fs.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
-	/**
-	 * 关闭表格连接
-	 */
-	private void destory(Workbook wb, FileInputStream fs) {
-		// 关闭表
-		if (wb != null)
-			try {
+
+	// 以表名读取数据
+	public void set_value(String name,int x, int y, String value) {
+		if (null == wb)
+			return;
+		System.out.println("here");
+		Sheet sheet = wb.getSheet(name);
+		if (null == sheet)
+			return;
+		set_data(x,y,value);
+	}
+	
+	public void set_data(int x, int y, String value) {
+
+		try {
+			System.out.println(x +" " + y);
+			Row row = sheet.getRow(x);
+			if (row != null) {
+				Cell cell = row.getCell(y);
+				cell.setCellValue(value);
+				FileOutputStream out = new FileOutputStream(excel_file);
+				wb.write(out);
+				out.flush();
+				out.close();
 				wb.close();
-			} catch (Exception e) {
-				e.printStackTrace();
 			}
-		// 关闭数据流
-		if (fs != null)
-			try {
-				fs.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 }

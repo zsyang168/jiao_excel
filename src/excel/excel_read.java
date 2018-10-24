@@ -68,6 +68,8 @@ public class excel_read {
 				wb = new HSSFWorkbook(fs);
 			else
 				wb = new XSSFWorkbook(fs);
+			//¹Ø±ÕÁ÷
+			fs.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {

@@ -2,6 +2,11 @@ package excel;
 
 public class excel_func {
 
+	public	void set_excel(String file_name, String sheet_name, int x, int y,String value) {
+		// TODO Auto-generated method stub
+		excel_write test=new excel_write(file_name);
+		test.set_value(sheet_name, x, y, value);
+	}
 	public	Object[][] get_excel_data_by_name(String file_name, String sheet_name) {
 		// TODO Auto-generated method stub
 		excel_read test=new excel_read(file_name);
