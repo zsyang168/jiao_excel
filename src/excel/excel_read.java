@@ -17,7 +17,7 @@ public class excel_read {
 	FileInputStream fs;
 	Workbook wb;
 	//以表名读取数据
-	public Object[][] get_sheet_by_name(String name) {
+	public Object[][] get_sheet(String name) {
 		if (null == wb)
 			return null;
 		Sheet sheet = wb.getSheet(name);
@@ -26,7 +26,7 @@ public class excel_read {
 		return get_data(sheet);
 	}
 	//以表下标读取数据
-	public Object[][] get_sheet_by_index(int index) {
+	public Object[][] get_sheet(int index) {
 		if (null == wb)
 			return null;
 		Sheet sheet = wb.getSheetAt(index);

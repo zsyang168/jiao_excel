@@ -1,15 +1,15 @@
 package main;
 
-public class location {
+public class Location {
 	public int x;
 	public int y;
-	public location() {
+	public Location() {
 		// TODO Auto-generated constructor stub
 		x = -1;
 		y = -1;
 	}
 	
-	public location(int x, int y) {
+	public Location(int x, int y) {
 		// TODO Auto-generated constructor stub
 		this.x = x;
 		this.y = y;
